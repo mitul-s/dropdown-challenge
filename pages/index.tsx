@@ -1,5 +1,5 @@
 import Head from "next/head";
-import Image from "next/image";
+import Image, { StaticImageData } from "next/image";
 import * as React from "react";
 import {
   Popover,
@@ -11,6 +11,7 @@ import {
 import useSearch from "../hooks/useSearch";
 import bitcoin from "../public/images/bitcoin.png";
 import useKeyPress from "../hooks/useKeyPress";
+import { useReducer } from "react";
 
 type Dropdown = {
   useSearch_: boolean;
@@ -20,7 +21,7 @@ type Dropdown = {
 type Option = {
   id: number;
   title: string;
-  image: string;
+  image: string | StaticImageData;
   subtitle?: string;
   descriptor?: number;
   selected?: boolean;
@@ -64,7 +65,7 @@ const data = [
   },
   {
     id: 5,
-    title: "Litcoin",
+    title: "Litecoin",
     subtitle: "LTC",
     descriptor: 3000,
     image: "",
@@ -110,9 +111,19 @@ const AddIcon = (
   </svg>
 );
 
-const initialState = { selectedIndex: 0 };
+type State = {
+  selectedIndex: number;
+};
 
-function reducer(state, action) {
+interface Action {
+  type: string;
+  payload?: number;
+}
+type Reducer<State, Action> = (state: State, action: Action) => State;
+
+const initialState: State = { selectedIndex: 0 };
+
+function reducer(state: State, action: Action): State {
   switch (action.type) {
     case "arrowUp":
       return {
@@ -146,7 +157,7 @@ const Dropdown = ({ useSearch_, options }: Dropdown) => {
 
   const arrowUpPressed = useKeyPress("ArrowUp", inputRef);
   const arrowDownPressed = useKeyPress("ArrowDown", inputRef);
-  const [state, dispatch] = React.useReducer(reducer, initialState);
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   const [open, setOpen] = React.useState<boolean>(false);
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -173,6 +184,8 @@ const Dropdown = ({ useSearch_, options }: Dropdown) => {
     if (e.key === "Enter") {
       setOpen(false);
       // dispatch({ type: "select", payload: state.selectedIndex });
+      console.log(filter);
+      console.log(filter.list[state.selectedIndex]);
       setSearchValue(filter.list[state.selectedIndex]?.title);
     }
 
@@ -290,7 +303,12 @@ const Dropdown = ({ useSearch_, options }: Dropdown) => {
             </div>
           </div>
         ) : (
-          <button onClick={() => setOpen(!open)}>Search</button>
+          <button
+            className="w-full py-2 text-white transition border rounded shadow-sm bg-gray-darker hover:bg-gray-darker/90 active:shadow-none hover:shadow"
+            onClick={() => setOpen(!open)}
+          >
+            Search
+          </button>
         )}
       </PopoverAnchor>
       <PopoverPortal>
