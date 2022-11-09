@@ -1,4 +1,3 @@
-import Head from "next/head";
 import Image, { StaticImageData } from "next/image";
 import * as React from "react";
 import {
@@ -8,24 +7,34 @@ import {
   PopoverContent,
   PopoverPortal,
 } from "@radix-ui/react-popover";
-import useSearch from "../hooks/useSearch";
+// import useSearch from "../hooks/useSearch";
 import bitcoin from "../public/images/bitcoin.png";
+import eth from "../public/images/ethereum.png";
+import ltc from "../public/images/litecoin.png";
+import omg from "../public/images/omg-network.png";
+import usdc from "../public/images/usdc.png";
+import bch from "../public/images/bitcoin-cash.png";
+import dai from "../public/images/dai.png";
+import doge from "../public/images/doge-coin.png";
 import useKeyPress from "../hooks/useKeyPress";
 import { useReducer } from "react";
+import SearchIcon from "../components/SearchIcon";
 
-type Dropdown = {
-  useSearch_: boolean;
+interface Dropdown {
+  useSearch: boolean;
   options: Array<Option>;
-};
+}
 
-type Option = {
+interface Option {
   id: number;
   title: string;
   image: string | StaticImageData;
   subtitle?: string;
   descriptor?: number;
   selected?: boolean;
-};
+  onMouseMove?: () => void;
+  onClick?: () => void;
+}
 
 const data = [
   {
@@ -40,115 +49,135 @@ const data = [
     title: "Ethereum",
     subtitle: "ETH",
     descriptor: 3000,
-    image: "",
+    image: eth,
   },
   {
     id: 2,
     title: "Dogecoin",
     subtitle: "Doge",
     descriptor: 3000,
-    image: "",
+    image: doge,
   },
   {
     id: 3,
     title: "Bitcoin Cash",
     subtitle: "BCH",
     descriptor: 3000,
-    image: "",
+    image: bch,
   },
   {
     id: 4,
     title: "Dai",
     subtitle: "Dai",
     descriptor: 3000,
-    image: "",
+    image: dai,
   },
   {
     id: 5,
     title: "Litecoin",
     subtitle: "LTC",
     descriptor: 3000,
-    image: "",
+    image: ltc,
   },
 ];
 
-const SearchIcon = () => (
-  <svg width={20} height={20} fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path
-      fillRule="evenodd"
-      clipRule="evenodd"
-      d="M14 9.167a4.833 4.833 0 1 1-9.667 0 4.833 4.833 0 0 1 9.667 0Zm-.95 4.353a5.833 5.833 0 1 1 .687-.727l3.763 3.763-.707.707-3.743-3.743Z"
-      fill="#000"
-    />
-  </svg>
-);
-
-const AddIcon = (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width={20}
-    height={20}
-    viewBox="0 0 256 256"
-  >
-    <path fill="none" d="M0 0h256v256H0z" />
-    <circle
-      cx={128}
-      cy={128}
-      r={96}
-      fill="none"
-      stroke="#000"
-      strokeMiterlimit={10}
-      strokeWidth={16}
-    />
-    <path
-      fill="none"
-      stroke="#000"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={16}
-      d="M88 128h80M128 88v80"
-    />
-  </svg>
-);
-
 type State = {
   selectedIndex: number;
+  options: Array<Option>;
 };
 
-interface Action {
-  type: string;
-  payload?: number;
-}
-type Reducer<State, Action> = (state: State, action: Action) => State;
+type Action =
+  | { type: "arrowUp" | "arrowDown" }
+  | { type: "select"; payload: State }
+  | { type: "updateOptions"; payload: { options: Array<Option> } };
 
-const initialState: State = { selectedIndex: 0 };
+const initialState: State = { selectedIndex: 0, options: data };
 
-function reducer(state: State, action: Action): State {
+function reducer(state: State, action: Action) {
   switch (action.type) {
+    case "updateOptions":
+      return {
+        selectedIndex: 0,
+        options: action.payload.options,
+      };
     case "arrowUp":
       return {
+        options: state.options,
         selectedIndex:
-          state.selectedIndex !== 0 ? state.selectedIndex - 1 : data.length - 1,
+          state.selectedIndex !== 0
+            ? state.selectedIndex - 1
+            : state.options.length - 1,
       };
     case "arrowDown":
+      console.log(state.selectedIndex);
+      console.log("options", state.options.length - 1);
       return {
+        options: state.options,
         selectedIndex:
-          state.selectedIndex !== data.length - 1 ? state.selectedIndex + 1 : 0,
+          state.selectedIndex !== state.options.length - 1
+            ? state.selectedIndex + 1
+            : 0,
       };
     case "select":
-      return { selectedIndex: action.payload };
+      return {
+        selectedIndex: action.payload.selectedIndex,
+        options: action.payload.options,
+      };
     default:
       throw new Error();
   }
 }
 
-const Dropdown = ({ useSearch_, options }: Dropdown) => {
+const Option = ({
+  image,
+  selected,
+  title,
+  subtitle,
+  descriptor,
+  id,
+  onMouseMove,
+  onClick,
+}: Option) => {
+  return (
+    <li
+      className="list-none transition rounded data-[selected=true]:bg-gray-light group"
+      role="option"
+      aria-selected={selected}
+      data-selected={selected}
+    >
+      <button
+        className="flex items-center w-full h-full p-2 text-xs leading-none gap-x-3"
+        tabIndex={-1}
+        onClick={onClick}
+        onMouseMove={onMouseMove}
+      >
+        <Image src={image} className="w-5 h-5 rounded-full" alt="" />
+        <div className="flex flex-col items-start gap-y-1">
+          <div className="font-medium">{title}</div>
+          {subtitle && (
+            <span className="tracking-tight uppercase text-black/50">
+              ${subtitle}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center ml-auto gap-x-2">
+          <div className="invisible px-1.5 py-0.5 leading-none transition rounded bg-gray text-gray-dark group-data-[selected=true]:visible">
+            Enter ↵
+          </div>
+          {descriptor &&
+            new Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency: "USD",
+            }).format(descriptor)}
+        </div>
+      </button>
+    </li>
+  );
+};
+
+const Dropdown = ({ useSearch, options }: Dropdown) => {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const containerRef = React.useRef<HTMLUListElement>(null);
-  // const { results, searchValue, setSearchValue } = useSearch<Option>({
-  //   dataSet: options,
-  //   keys: ["title", "subtitle"],
-  // });
   const [searchValue, setSearchValue] = React.useState("");
   const [filter, setFilter] = React.useState({
     query: "",
@@ -166,13 +195,17 @@ const Dropdown = ({ useSearch_, options }: Dropdown) => {
     }
     setSearchValue(e.target.value);
 
-    const results = options.filter((post) => {
+    const results = options.filter((item) => {
       if (e.target.value === "") return options;
-      return post.title.toLowerCase().includes(e.target.value.toLowerCase());
+      return item.title.toLowerCase().includes(e.target.value.toLowerCase());
     });
     setFilter({
       query: e.target.value,
       list: results,
+    });
+    dispatch({
+      type: "updateOptions",
+      payload: { options: results },
     });
   };
 
@@ -183,9 +216,13 @@ const Dropdown = ({ useSearch_, options }: Dropdown) => {
 
     if (e.key === "Enter") {
       setOpen(false);
-      // dispatch({ type: "select", payload: state.selectedIndex });
-      console.log(filter);
-      console.log(filter.list[state.selectedIndex]);
+      // dispatch({
+      //   type: "select",
+      //   payload: { selectedIndex: state.selectedIndex, options: filter.list },
+      // });
+      // console.log(filter);
+      // console.log(filter.list[state.selectedIndex]);
+      // console.log(state.selectedIndex);
       setSearchValue(filter.list[state.selectedIndex]?.title);
     }
 
@@ -220,59 +257,10 @@ const Dropdown = ({ useSearch_, options }: Dropdown) => {
     }
   }, [arrowDownPressed]);
 
-  const Option = ({
-    image,
-    selected,
-    title,
-    subtitle,
-    descriptor,
-    id,
-    ...props
-  }: Option) => {
-    return (
-      <li
-        className="list-none transition rounded data-[selected=true]:bg-gray-light group"
-        role="option"
-        aria-selected={selected}
-        data-selected={selected}
-      >
-        <button
-          className="flex items-center w-full h-full p-2 text-xs leading-none gap-x-3"
-          tabIndex={-1}
-          onClick={() => handleSelect(title)}
-          onMouseMove={() => dispatch({ type: "select", payload: id })}
-          {...props}
-        >
-          <>
-            {/* <Image src={image} className="w-5 h-5 rounded-full" alt="" /> */}
-            <div className="flex flex-col items-start gap-y-1">
-              <div className="font-medium">{title}</div>
-              {subtitle && (
-                <span className="tracking-tight uppercase text-black/50">
-                  ${subtitle}
-                </span>
-              )}
-            </div>
-            <div className="flex items-center ml-auto gap-x-2">
-              <div className="invisible px-1.5 py-0.5 leading-none transition rounded bg-gray text-gray-dark group-data-[selected=true]:visible">
-                Enter ↵
-              </div>
-              {descriptor &&
-                new Intl.NumberFormat("en-US", {
-                  style: "currency",
-                  currency: "USD",
-                }).format(descriptor)}
-            </div>
-          </>
-        </button>
-      </li>
-    );
-  };
-
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverAnchor>
-        {useSearch_ ? (
+        {useSearch ? (
           <div className="relative transition-all rounded overflow-clip border gap-x-1.5 leading-none w-[346px] focus-within:ring-2 focus-within:ring-offset-2 hover:border-blue-200 focus-within:border-blue-200 group">
             <label className="sr-only" id="cmpd-label" htmlFor="assetSearch">
               Search for assets
@@ -323,30 +311,29 @@ const Dropdown = ({ useSearch_, options }: Dropdown) => {
             role="listbox"
             ref={containerRef}
           >
-            {/* {options
-              .filter(
-                (option) => option.title.includes(filter) || filter === ""
-              )
-              .map((item) => (
-                <Option key={item.title} {...item} />
-              ))} */}
-            {/* {results.map((item) => (
-              <Option
-                key={item.id}
-                selected={state.selectedIndex === item.id}
-                {...item}
-              />
-            ))} */}
-            {filter.list.map((item) => (
-              <Option
-                key={item.title}
-                selected={state.selectedIndex === item.id}
-                {...item}
-              />
-            ))}
-            {searchValue !== "" && filter.list.length <= 2 ? (
-              <Option image={AddIcon} title={`Add "${searchValue}" manually`} />
-            ) : null}
+            {filter.list.map((item, index) => {
+              // console.log(filter.list);
+              return (
+                <Option
+                  key={item.title}
+                  selected={state.selectedIndex === index}
+                  onMouseMove={() =>
+                    dispatch({
+                      type: "select",
+                      payload: {
+                        selectedIndex: index,
+                        options: filter.list,
+                      },
+                    })
+                  }
+                  onClick={() => handleSelect(item.title)}
+                  {...item}
+                />
+              );
+            })}
+            {/* {searchValue !== "" && filter.list.length <= 2 ? (
+              <Option title={`Add "${searchValue}" manually`} />
+            ) : null} */}
           </ul>
         </PopoverContent>
       </PopoverPortal>
@@ -355,11 +342,21 @@ const Dropdown = ({ useSearch_, options }: Dropdown) => {
 };
 
 export default function Home() {
-  // const [open, setOpen] = React.useState(true);
   return (
     <div className="grid w-screen h-screen gap-y-12 place-content-center">
-      <Dropdown useSearch_={true} options={data} />
-      {/* <Dropdown useSearch_={false} options={data} /> */}
+      <Dropdown useSearch={true} options={data} />
+      {/* <Dropdown useSearch={false} options={data} /> */}
     </div>
   );
 }
+
+// export async function getServerSideProps() {
+//   const res = await fetch("https://api.coingecko.com/api/v3/coins/list");
+//   const data = await res.json();
+//   console.log(data);
+//   return {
+//     props: {
+//       data,
+//     },
+//   };
+// }

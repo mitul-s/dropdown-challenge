@@ -1,14 +1,15 @@
-import React from "react"
+import React from "react";
 
 type Handler = {
-    key: string;
-}
+  key: string;
+};
 
 const useKeyPress = (targetKey: string, ref: React.RefObject<HTMLElement>) => {
   const [keyPressed, setKeyPressed] = React.useState(false);
 
   React.useEffect(() => {
     const elementRef = ref.current;
+
     const downHandler = ({ key }: Handler) => {
       if (key === targetKey) {
         setKeyPressed(true);
@@ -27,7 +28,7 @@ const useKeyPress = (targetKey: string, ref: React.RefObject<HTMLElement>) => {
       elementRef?.removeEventListener("keydown", downHandler);
       elementRef?.removeEventListener("keyup", upHandler);
     };
-  }, [targetKey, ref]);
+  }, [ref, targetKey]);
 
   return keyPressed;
 };
