@@ -52,22 +52,12 @@ a {
     border-radius: inherit;
   }
   .animate-slide-down {
-    animation: slide-down 0.3s ease-in-out;
+    animation: slide-down 0.3s cubic-bezier(0.12, 0.23, 0.5, 1);
   }
   .animate-slide-up {
-    animation: slide-up 0.3s ease-out;
+    animation: slide-up 0.2s cubic-bezier(0.5, 0, 0.88, 0.77);
   }
   .popover {
     @apply max-h-64 overflow-hidden h-fit;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  /* html {
-    color-scheme: dark;
-  } */
-  body {
-    color: black;
-    background: white;
   }
 }
