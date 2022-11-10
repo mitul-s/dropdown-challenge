@@ -116,9 +116,9 @@ const DropdownOption = ({
         ) : null}
       </div>
       <div className="flex items-center ml-auto gap-x-2">
-        <div className="invisible px-1.5 py-0.5 leading-none transition rounded bg-gray text-gray-dark group-data-[selected=true]:visible">
+        <span className="invisible px-1.5 py-0.5 leading-none transition rounded bg-gray text-gray-dark group-data-[selected=true]:visible">
           Enter ↵
-        </div>
+        </span>
         {descriptor ? formatCurrency(descriptor) : null}
       </div>
     </li>
@@ -148,7 +148,7 @@ const DropdownInput = ({
         Search for assets
       </label>
       <input
-        className="py-3.5 px-4 outline-none w-full transition-all placeholder:opacity-80 group-hover:placeholder:opacity-100"
+        className="py-3.5 px-4 outline-none w-full transition-all placeholder:opacity-80 group-hover:placeholder:opacity-100 group-focus-within:placeholder:opacity-100"
         placeholder="Search for an asset"
         id="assetSearch"
         name="assetSearch"
