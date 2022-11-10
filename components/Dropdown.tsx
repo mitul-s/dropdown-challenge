@@ -8,7 +8,7 @@ import {
 } from "@radix-ui/react-popover";
 import useKeyPress from "../hooks/useKeyPress";
 import { useReducer } from "react";
-import { Search } from "./Icons";
+import { NotFound, Search } from "./Icons";
 
 interface State {
   selectedIndex: number;
@@ -89,9 +89,13 @@ const DropdownOption = ({
       onClick={onClick}
       onMouseMove={onMouseMove}
     >
-      <Image src={image} className="w-5 h-5 rounded-full" alt="" />
+      <Image
+        src={image}
+        className="w-5 h-5 rounded-full"
+        alt={`Logo for ${title} cryptocurrency`}
+      />
       <div className="flex flex-col items-start gap-y-1">
-        <div className="w-24 font-medium overflow-clip whitespace-nowrap text-ellipsis leading-[normal]">
+        <div className="w-28 font-medium overflow-clip whitespace-nowrap text-ellipsis leading-[normal]">
           {title}
         </div>
         {subtitle ? (
@@ -166,6 +170,11 @@ interface DropdownProps {
   options: Array<DropdownOptionProps>;
 }
 
+interface Filter {
+  query: string;
+  list: Array<DropdownOptionProps>;
+}
+
 const Dropdown = ({ useSearch, options }: DropdownProps) => {
   const initialState: State = { selectedIndex: 0, options: options };
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -173,8 +182,8 @@ const Dropdown = ({ useSearch, options }: DropdownProps) => {
   const elementRef = useSearch ? inputRef : buttonRef;
   const containerRef = React.useRef<HTMLUListElement>(null);
   const [open, setOpen] = React.useState<boolean>(false);
-  const [searchValue, setSearchValue] = React.useState("");
-  const [filter, setFilter] = React.useState({
+  const [searchValue, setSearchValue] = React.useState<string>("");
+  const [filter, setFilter] = React.useState<Filter>({
     query: "",
     list: options,
   });
@@ -183,18 +192,20 @@ const Dropdown = ({ useSearch, options }: DropdownProps) => {
   const arrowDownPressed = useKeyPress("ArrowDown", elementRef);
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!open) {
       setOpen(true);
     }
-    setSearchValue(e.target.value);
+    setSearchValue(event.target.value);
 
     const results = options.filter((item) => {
-      if (e.target.value === "") return options;
-      return item.title.toLowerCase().includes(e.target.value.toLowerCase());
+      if (event.target.value === "") return options;
+      return item.title
+        .toLowerCase()
+        .includes(event.target.value.toLowerCase());
     });
     setFilter({
-      query: e.target.value,
+      query: event.target.value,
       list: results,
     });
     dispatch({
@@ -203,18 +214,18 @@ const Dropdown = ({ useSearch, options }: DropdownProps) => {
     });
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!open && e.key === "ArrowDown") {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!open && event.key === "ArrowDown") {
       setOpen(true);
     }
 
-    if (e.key === "Enter") {
+    if (event.key === "Enter") {
       setOpen(false);
       setSearchValue(filter.list[state.selectedIndex]?.title);
     }
 
-    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-      e.preventDefault();
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault();
     }
   };
 
@@ -234,24 +245,13 @@ const Dropdown = ({ useSearch, options }: DropdownProps) => {
     }
   };
 
-  React.useEffect(() => {
-    if (arrowUpPressed) {
-      dispatch({ type: "arrowUp" });
-    }
-  }, [arrowUpPressed]);
-
-  React.useEffect(() => {
-    if (arrowDownPressed) {
-      dispatch({ type: "arrowDown" });
-    }
-  }, [arrowDownPressed]);
-
   // Icky
   React.useLayoutEffect(() => {
     if (open) {
       const container = containerRef.current;
-      let edgePadding = 6.5;
       if (!container) return;
+
+      let edgePadding = 6.5;
 
       window.requestAnimationFrame(() => {
         const element = container.querySelector(
@@ -271,6 +271,18 @@ const Dropdown = ({ useSearch, options }: DropdownProps) => {
     }
   }, [open, state.selectedIndex]);
 
+  React.useEffect(() => {
+    if (arrowUpPressed) {
+      dispatch({ type: "arrowUp" });
+    }
+  }, [arrowUpPressed]);
+
+  React.useEffect(() => {
+    if (arrowDownPressed) {
+      dispatch({ type: "arrowDown" });
+    }
+  }, [arrowDownPressed]);
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverAnchor>
@@ -285,7 +297,7 @@ const Dropdown = ({ useSearch, options }: DropdownProps) => {
           />
         ) : (
           <button
-            className="w-full py-2 text-white transition border rounded shadow-sm bg-gray-darker hover:bg-gray-darker/90 active:shadow-none hover:shadow"
+            className="w-full px-4 py-2 text-white transition border rounded shadow-sm bg-gray-darker hover:bg-gray-darker/90 active:shadow-none hover:shadow"
             onClick={() => setOpen(!open)}
             ref={buttonRef}
           >
@@ -327,7 +339,9 @@ const Dropdown = ({ useSearch, options }: DropdownProps) => {
               );
             })}
             {searchValue !== "" && filter.list.length <= 0 ? (
-              <div>No results found</div>
+              <div className="py-2 mx-auto text-xs font-medium">
+                No assets found
+              </div>
             ) : null}
           </ul>
         </PopoverContent>
