@@ -8,7 +8,7 @@ import {
 } from "@radix-ui/react-popover";
 import useKeyPress from "../hooks/useKeyPress";
 import { useReducer } from "react";
-import { NotFound, Search } from "./Icons";
+import { Search } from "./Icons";
 
 interface State {
   selectedIndex: number;
@@ -20,8 +20,13 @@ type Action =
   | { type: "select"; payload: State }
   | { type: "updateOptions"; payload: { options: Array<DropdownOptionProps> } };
 
+// UTILS
+// We use this to keep track of a DropdownOption via keyboard actions
 function reducer(state: State, action: Action) {
   switch (action.type) {
+    // Whenever the input value changes, we need to update the data with the new filtered data
+    // The keyboad selection resets to the start of the list
+    // It would be nice to make the selection persist and only reset if the item no longer part of the data
     case "updateOptions":
       return {
         selectedIndex: 0,
@@ -43,6 +48,7 @@ function reducer(state: State, action: Action) {
             ? state.selectedIndex + 1
             : 0,
       };
+    // "Select" an item whenever you navigated with keyboard or mouseOver
     case "select":
       return {
         selectedIndex: action.payload.selectedIndex,
@@ -52,6 +58,14 @@ function reducer(state: State, action: Action) {
       throw new Error();
   }
 }
+
+// Using native JS to convert numbers into a readable currency
+const formatCurrency = (currency: number) =>
+  new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(currency);
+//
 
 interface DropdownOptionProps {
   id: number;
@@ -73,12 +87,6 @@ const DropdownOption = ({
   onMouseMove,
   onClick,
 }: DropdownOptionProps) => {
-  const formatCurrency = (currency: number) =>
-    new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(currency);
-
   return (
     <li
       className="list-none transition rounded data-[selected=true]:bg-gray-light group flex items-center w-full h-full p-2 text-xs leading-none gap-x-3 cursor-pointer"
