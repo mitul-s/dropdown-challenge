@@ -9,12 +9,12 @@ import {
 import useKeyPress from "../hooks/useKeyPress";
 import { useReducer } from "react";
 import SearchIcon from "../components/SearchIcon";
-interface Dropdown {
+interface DropdownProps {
   useSearch: boolean;
-  options: Array<Option>;
+  options: Array<DropdownOptionProps>;
 }
 
-interface Option {
+interface DropdownOptionProps {
   id: number;
   title: string;
   image: string | StaticImageData;
@@ -27,13 +27,13 @@ interface Option {
 
 type State = {
   selectedIndex: number;
-  options: Array<Option>;
+  options: Array<DropdownOptionProps>;
 };
 
 type Action =
   | { type: "arrowUp" | "arrowDown" }
   | { type: "select"; payload: State }
-  | { type: "updateOptions"; payload: { options: Array<Option> } };
+  | { type: "updateOptions"; payload: { options: Array<DropdownOptionProps> } };
 
 function reducer(state: State, action: Action) {
   switch (action.type) {
@@ -76,7 +76,7 @@ const Option = ({
   descriptor,
   onMouseMove,
   onClick,
-}: Option) => {
+}: DropdownOptionProps) => {
   const formatCurrency = (currency: number) =>
     new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -112,7 +112,7 @@ const Option = ({
   );
 };
 
-const Dropdown = ({ useSearch, options }: Dropdown) => {
+const Dropdown = ({ useSearch, options }: DropdownProps) => {
   const initialState: State = { selectedIndex: 0, options: options };
   const inputRef = React.useRef<HTMLInputElement>(null);
   const containerRef = React.useRef<HTMLUListElement>(null);
