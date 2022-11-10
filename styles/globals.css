@@ -42,7 +42,7 @@ a {
     opacity: 0;
   }
   100% {
-    transform: translateY(-30px);
+    transform: translateY(-10px);
     opacity: 100;
   }
 }
