@@ -4,9 +4,9 @@ import { currencies as data } from "../consts";
 
 export default function Home() {
   return (
-    <div className="grid w-screen h-screen gap-y-12 place-content-center">
+    <div className="flex items-center w-full h-full -mt-24 justify-evenly gap-y-12">
       <Dropdown useSearch={true} options={data} />
-      {/* <Dropdown useSearch={false} options={data} /> */}
+      <Dropdown useSearch={false} options={data} />
     </div>
   );
 }
