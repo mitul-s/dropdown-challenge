@@ -7,7 +7,6 @@ import {
   PopoverPortal,
 } from "@radix-ui/react-popover";
 import useKeyPress from "../hooks/useKeyPress";
-import { useReducer } from "react";
 import { Search } from "./Icons";
 
 interface State {
@@ -78,7 +77,7 @@ interface DropdownOptionProps {
   onClick?: () => void;
 }
 
-const DropdownOption = ({
+export const DropdownOption = ({
   image,
   selected,
   title,
@@ -92,9 +91,12 @@ const DropdownOption = ({
   return (
     <li
       className="list-none transition rounded data-[selected=true]:bg-gray-light group flex items-center w-full h-full p-2 text-xs leading-none gap-x-3 cursor-pointer"
+      // Role + aria attributes to meet accessibility specs
       role="option"
       aria-selected={selected}
       data-selected={selected}
+      // Use tabIndex -1 so the list item can't be focused by tabbing
+      // Focus should always stay on the input so user can type
       tabIndex={-1}
       onClick={onClick}
       onMouseMove={onMouseMove}
@@ -116,7 +118,10 @@ const DropdownOption = ({
         ) : null}
       </div>
       <div className="flex items-center ml-auto gap-x-2">
-        <span className="invisible px-1.5 py-0.5 leading-none transition rounded bg-gray text-gray-dark group-data-[selected=true]:visible">
+        <span
+          // "Invisible" rather than "hidden" so that it still exists in the DOM and can be read by screen readers
+          className="invisible px-1.5 py-0.5 leading-none transition rounded bg-gray text-gray-dark group-data-[selected=true]:visible"
+        >
           Enter ↵
         </span>
         {descriptor ? formatCurrency(descriptor) : null}
@@ -134,7 +139,7 @@ interface DropdownInputProps {
   inputRef: React.RefObject<HTMLInputElement>;
 }
 
-const DropdownInput = ({
+export const DropdownInput = ({
   value,
   onChange,
   onClick,
@@ -176,32 +181,64 @@ const DropdownInput = ({
   );
 };
 
+interface DropdownListProps {
+  containerRef: React.RefObject<HTMLUListElement>;
+  children: React.ReactNode;
+}
+
+export const DropdownList = ({ containerRef, children }: DropdownListProps) => {
+  return (
+    <PopoverPortal>
+      <PopoverContent
+        // Don't drive focus to the popover on open, keep on input
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        // Exit animations are failing on Radix Components & Next.js 13
+        // So I only included enter animation for now
+        className="w-[346px] data-[state=open]:animate-slide-down"
+        id="cmpd-currencies"
+        sideOffset={8}
+        asChild
+      >
+        <ul
+          className="flex flex-col px-2 overflow-auto bg-white border rounded shadow-xl h-fit max-h-64 py-1.5"
+          role="listbox"
+          ref={containerRef}
+        >
+          {children}
+        </ul>
+      </PopoverContent>
+    </PopoverPortal>
+  );
+};
+
 interface DropdownProps {
   useSearch: boolean;
   options: Array<DropdownOptionProps>;
 }
 
-interface Filter {
-  query: string;
-  list: Array<DropdownOptionProps>;
-}
-
-const Dropdown = ({ useSearch, options }: DropdownProps) => {
+export const Dropdown = ({ useSearch, options }: DropdownProps) => {
+  // State controlled by useReducer
   const initialState: State = { selectedIndex: 0, options: options };
+  const [state, dispatch] = React.useReducer(reducer, initialState);
+
+  // Refs
   const inputRef = React.useRef<HTMLInputElement>(null);
   const buttonRef = React.useRef<HTMLButtonElement>(null);
   const elementRef = useSearch ? inputRef : buttonRef;
   const containerRef = React.useRef<HTMLUListElement>(null);
+
+  // States
+  // I could have contolled these with the dispatch function,
+  // but for legibility I felt splitting it up was better
   const [open, setOpen] = React.useState<boolean>(false);
   const [searchValue, setSearchValue] = React.useState<string>("");
-  const [filter, setFilter] = React.useState<Filter>({
-    query: "",
-    list: options,
-  });
+  const [filter, setFilter] =
+    React.useState<Array<DropdownOptionProps>>(options);
 
+  // useKeyPress custom hook to detect arrow key navigation
+  // Only activates if the selected ref is focused
   const arrowUpPressed = useKeyPress("ArrowUp", elementRef);
   const arrowDownPressed = useKeyPress("ArrowDown", elementRef);
-  const [state, dispatch] = useReducer(reducer, initialState);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!open) {
@@ -215,10 +252,7 @@ const Dropdown = ({ useSearch, options }: DropdownProps) => {
         .toLowerCase()
         .includes(event.target.value.toLowerCase());
     });
-    setFilter({
-      query: event.target.value,
-      list: results,
-    });
+    setFilter(results);
     dispatch({
       type: "updateOptions",
       payload: { options: results },
@@ -232,7 +266,7 @@ const Dropdown = ({ useSearch, options }: DropdownProps) => {
 
     if (event.key === "Enter") {
       setOpen(false);
-      setSearchValue(filter.list[state.selectedIndex]?.title);
+      setSearchValue(filter[state.selectedIndex]?.title);
     }
 
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {
@@ -256,15 +290,18 @@ const Dropdown = ({ useSearch, options }: DropdownProps) => {
     }
   };
 
-  // Icky
+  // Allows the DropdownList to be scrolled while user is navigatating with their keyboard
   React.useEffect(() => {
     if (open) {
       const container = containerRef.current;
       if (!container) return;
 
+      // Account for container padding "py-1.5"
       let edgePadding = 6.5;
 
       window.requestAnimationFrame(() => {
+        // Select the element that is currently as `state.SelectedIndex`
+        // Could have also used `data-selected` attribute that I added myself
         const element = container.querySelector(
           "[aria-selected=true]"
         ) as HTMLElement;
@@ -295,6 +332,8 @@ const Dropdown = ({ useSearch, options }: DropdownProps) => {
   }, [arrowDownPressed]);
 
   return (
+    // Popover is a controlled component now to
+    // ensure we can control `open` state how we like
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverAnchor>
         {useSearch ? (
@@ -316,47 +355,36 @@ const Dropdown = ({ useSearch, options }: DropdownProps) => {
           </button>
         )}
       </PopoverAnchor>
-      <PopoverPortal>
-        <PopoverContent
-          onOpenAutoFocus={(e) => e.preventDefault()}
-          // Exit animations are failing on Radix Components & Next.js 13
-          // So I only included enter animation for now
-          className="w-[346px] data-[state=open]:animate-slide-down"
-          id="cmpd-currencies"
-          sideOffset={8}
-        >
-          <ul
-            className="flex flex-col px-2 overflow-auto bg-white border rounded shadow-xl h-fit max-h-64 py-1.5"
-            role="listbox"
-            ref={containerRef}
-          >
-            {filter.list.map((item, index) => {
-              return (
-                <DropdownOption
-                  key={item.title}
-                  selected={state.selectedIndex === index}
-                  onMouseMove={() =>
-                    dispatch({
-                      type: "select",
-                      payload: {
-                        selectedIndex: index,
-                        options: filter.list,
-                      },
-                    })
-                  }
-                  onClick={() => handleSelect(item.title)}
-                  {...item}
-                />
-              );
-            })}
-            {searchValue !== "" && filter.list.length <= 0 ? (
-              <div className="py-2 mx-auto text-xs font-medium">
-                No assets found
-              </div>
-            ) : null}
-          </ul>
-        </PopoverContent>
-      </PopoverPortal>
+      <DropdownList containerRef={containerRef}>
+        <>
+          {filter.map((item, index) => {
+            return (
+              <DropdownOption
+                key={item.id}
+                selected={state.selectedIndex === index}
+                // Select should occur when a mouse is moving OR a keyboard is navigating, not both
+                // You wouldn't use css hover states here, because it wouldn't allow you to set a selected item
+                onMouseMove={() =>
+                  dispatch({
+                    type: "select",
+                    payload: {
+                      selectedIndex: index,
+                      options: filter,
+                    },
+                  })
+                }
+                onClick={() => handleSelect(item.title)}
+                {...item}
+              />
+            );
+          })}
+          {searchValue !== "" && filter.length <= 0 ? (
+            <div className="py-2 mx-auto text-xs font-medium">
+              No assets found
+            </div>
+          ) : null}
+        </>
+      </DropdownList>
     </Popover>
   );
 };
