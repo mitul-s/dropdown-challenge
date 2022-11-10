@@ -169,18 +169,20 @@ interface DropdownProps {
 const Dropdown = ({ useSearch, options }: DropdownProps) => {
   const initialState: State = { selectedIndex: 0, options: options };
   const inputRef = React.useRef<HTMLInputElement>(null);
+  const buttonRef = React.useRef<HTMLButtonElement>(null);
+  const elementRef = useSearch ? inputRef : buttonRef;
   const containerRef = React.useRef<HTMLUListElement>(null);
+  const [open, setOpen] = React.useState<boolean>(false);
   const [searchValue, setSearchValue] = React.useState("");
   const [filter, setFilter] = React.useState({
     query: "",
     list: options,
   });
 
-  const arrowUpPressed = useKeyPress("ArrowUp", inputRef);
-  const arrowDownPressed = useKeyPress("ArrowDown", inputRef);
+  const arrowUpPressed = useKeyPress("ArrowUp", elementRef);
+  const arrowDownPressed = useKeyPress("ArrowDown", elementRef);
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const [open, setOpen] = React.useState<boolean>(false);
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!open) {
       setOpen(true);
@@ -285,8 +287,9 @@ const Dropdown = ({ useSearch, options }: DropdownProps) => {
           <button
             className="w-full py-2 text-white transition border rounded shadow-sm bg-gray-darker hover:bg-gray-darker/90 active:shadow-none hover:shadow"
             onClick={() => setOpen(!open)}
+            ref={buttonRef}
           >
-            Search
+            Add Asset
           </button>
         )}
       </PopoverAnchor>
