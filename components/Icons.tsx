@@ -1,4 +1,4 @@
-export default function SearchIcon({ ...props }) {
+export const Search = ({ ...props }) => {
   return (
     <svg
       width={20}
@@ -15,4 +15,4 @@ export default function SearchIcon({ ...props }) {
       />
     </svg>
   );
-}
+};
