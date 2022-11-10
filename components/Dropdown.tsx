@@ -244,6 +244,31 @@ const Dropdown = ({ useSearch, options }: DropdownProps) => {
     }
   }, [arrowDownPressed]);
 
+  // Icky
+  React.useLayoutEffect(() => {
+    if (open) {
+      const container = containerRef.current;
+      let edgePadding = 6.5;
+      if (!container) return;
+
+      window.requestAnimationFrame(() => {
+        const element = container.querySelector(
+          "[aria-selected=true]"
+        ) as HTMLElement;
+        if (element) {
+          const top = element.offsetTop - container.scrollTop - edgePadding;
+          const bottom =
+            container.scrollTop +
+            container.clientHeight -
+            (element.offsetTop + element.clientHeight + edgePadding);
+
+          if (bottom < 0) container.scrollTop -= bottom;
+          if (top < 0) container.scrollTop += top;
+        }
+      });
+    }
+  }, [open, state.selectedIndex]);
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverAnchor>
