@@ -1,20 +1,21 @@
 import React from "react";
 
-type Handler = {
+type HandlerProps = {
   key: string;
 };
 
+// Abstracted from https://usehooks.com/useKeyPress/
 const useKeyPress = (targetKey: string, ref: React.RefObject<HTMLElement>) => {
   const [keyPressed, setKeyPressed] = React.useState(false);
 
   React.useEffect(() => {
     const elementRef = ref.current;
-    const downHandler = ({ key }: Handler) => {
+    const downHandler = ({ key }: HandlerProps) => {
       if (key === targetKey) {
         setKeyPressed(true);
       }
     };
-    const upHandler = ({ key }: Handler) => {
+    const upHandler = ({ key }: HandlerProps) => {
       if (key === targetKey) {
         setKeyPressed(false);
       }

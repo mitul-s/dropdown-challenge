@@ -1,3 +1,4 @@
+// Prefer making my SVGs as components so I can use style/class props to have more control on them.
 export const Search = ({ ...props }) => {
   return (
     <svg
