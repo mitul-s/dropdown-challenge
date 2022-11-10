@@ -8,6 +8,11 @@ import xlm from "./public/images/stellar-lumens.png";
 import xrp from "./public/images/ripple.png";
 import dai from "./public/images/dai.png";
 import doge from "./public/images/doge-coin.png";
+import cosmos from "./public/images/cosmos.png";
+import chainlink from "./public/images/chainlink.png";
+import ox from "./public/images/ox.png";
+import peer from "./public/images/peercoin.png";
+import ethc from "./public/images/ethereum-classic.png";
 
 export const currencies = [
   {
@@ -79,5 +84,40 @@ export const currencies = [
     subtitle: "XRP",
     descriptor: 3000,
     image: xrp,
+  },
+  {
+    id: 10,
+    title: "0x",
+    subtitle: "ZRX",
+    descriptor: 3000,
+    image: ox,
+  },
+  {
+    id: 11,
+    title: "Peercoin",
+    subtitle: "PPC",
+    descriptor: 3000,
+    image: peer,
+  },
+  {
+    id: 12,
+    title: "Cosmos",
+    subtitle: "ATOM",
+    descriptor: 3000,
+    image: cosmos,
+  },
+  {
+    id: 13,
+    title: "Ethereum Classic",
+    subtitle: "ETC",
+    descriptor: 3000,
+    image: ethc,
+  },
+  {
+    id: 14,
+    title: "Chainlink",
+    subtitle: "LINK",
+    descriptor: 3000,
+    image: chainlink,
   },
 ];
