@@ -8,7 +8,7 @@ import {
 } from "@radix-ui/react-popover";
 import useKeyPress from "../hooks/useKeyPress";
 import { useReducer } from "react";
-import SearchIcon from "../components/SearchIcon";
+import { Search } from "./Icons";
 interface DropdownProps {
   useSearch: boolean;
   options: Array<DropdownOptionProps>;
@@ -25,10 +25,10 @@ interface DropdownOptionProps {
   onClick?: () => void;
 }
 
-type State = {
+interface State {
   selectedIndex: number;
   options: Array<DropdownOptionProps>;
-};
+}
 
 type Action =
   | { type: "arrowUp" | "arrowDown" }
@@ -68,7 +68,7 @@ function reducer(state: State, action: Action) {
   }
 }
 
-const Option = ({
+const DropdownOption = ({
   image,
   selected,
   title,
@@ -109,6 +109,57 @@ const Option = ({
         {descriptor && formatCurrency(descriptor)}
       </div>
     </li>
+  );
+};
+
+interface DropdownInputProps {
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onClick: () => void;
+  onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  expanded: boolean;
+  inputRef: React.RefObject<HTMLInputElement>;
+}
+
+const DropdownInput = ({
+  value,
+  onChange,
+  onClick,
+  onKeyDown,
+  expanded,
+  inputRef,
+}: DropdownInputProps) => {
+  return (
+    <div className="relative transition-all rounded overflow-clip border gap-x-1.5 leading-none w-[346px] focus-within:ring-2 focus-within:ring-offset-2 hover:border-blue-200 focus-within:border-blue-200 group">
+      <label className="sr-only" id="cmpd-label" htmlFor="assetSearch">
+        Search for assets
+      </label>
+      <input
+        className="py-3.5 px-4 outline-none w-full transition group-hover:opacity-80 group-focus-within:opacity-80 opacity-60"
+        placeholder="Search for an asset"
+        id="assetSearch"
+        name="assetSearch"
+        role="combobox"
+        aria-controls="cmpd-currencies"
+        aria-expanded={expanded}
+        aria-labelledby="cmpd-label"
+        autoCorrect="off"
+        autoComplete="off"
+        spellCheck={false}
+        type="text"
+        value={value}
+        onChange={onChange}
+        onClick={onClick}
+        onKeyDown={onKeyDown}
+        ref={inputRef}
+      />
+      <div
+        aria-hidden="true"
+        className="absolute top-3.5 right-3 shrink-0 pointer-events-none"
+      >
+        <Search />
+      </div>
+    </div>
   );
 };
 
@@ -173,7 +224,9 @@ const Dropdown = ({ useSearch, options }: DropdownProps) => {
   const handleSelect = (title: string) => {
     setOpen(false);
     setSearchValue(title);
-    inputRef?.current?.focus();
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
   };
 
   React.useEffect(() => {
@@ -192,35 +245,14 @@ const Dropdown = ({ useSearch, options }: DropdownProps) => {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverAnchor>
         {useSearch ? (
-          <div className="relative transition-all rounded overflow-clip border gap-x-1.5 leading-none w-[346px] focus-within:ring-2 focus-within:ring-offset-2 hover:border-blue-200 focus-within:border-blue-200 group">
-            <label className="sr-only" id="cmpd-label" htmlFor="assetSearch">
-              Search for assets
-            </label>
-            <input
-              className="py-3.5 px-4 outline-none w-full transition group-hover:opacity-80 group-focus-within:opacity-80 opacity-60"
-              placeholder="Search for an asset"
-              id="assetSearch"
-              role="combobox"
-              aria-controls="cmpd-currencies"
-              aria-expanded={open}
-              aria-labelledby="cmpd-label"
-              autoCorrect="off"
-              autoComplete="off"
-              spellCheck={false}
-              type="text"
-              value={searchValue}
-              onChange={handleChange}
-              onClick={handleClick}
-              onKeyDown={handleKeyDown}
-              ref={inputRef}
-            />
-            <div
-              aria-hidden="true"
-              className="absolute top-3.5 right-3 shrink-0 pointer-events-none"
-            >
-              <SearchIcon />
-            </div>
-          </div>
+          <DropdownInput
+            expanded={open}
+            value={searchValue}
+            onChange={handleChange}
+            onClick={handleClick}
+            onKeyDown={handleKeyDown}
+            inputRef={inputRef}
+          />
         ) : (
           <button
             className="w-full py-2 text-white transition border rounded shadow-sm bg-gray-darker hover:bg-gray-darker/90 active:shadow-none hover:shadow"
@@ -233,7 +265,7 @@ const Dropdown = ({ useSearch, options }: DropdownProps) => {
       <PopoverPortal>
         <PopoverContent
           onOpenAutoFocus={(e) => e.preventDefault()}
-          className="w-[346px]"
+          className="w-[346px] data-[state=open]:animate-slide-down"
           id="cmpd-currencies"
           sideOffset={8}
         >
@@ -244,7 +276,7 @@ const Dropdown = ({ useSearch, options }: DropdownProps) => {
           >
             {filter.list.map((item, index) => {
               return (
-                <Option
+                <DropdownOption
                   key={item.title}
                   selected={state.selectedIndex === index}
                   onMouseMove={() =>
@@ -261,9 +293,9 @@ const Dropdown = ({ useSearch, options }: DropdownProps) => {
                 />
               );
             })}
-            {/* {searchValue !== "" && filter.list.length <= 2 ? (
-              <Option title={`Add "${searchValue}" manually`} />
-            ) : null} */}
+            {searchValue !== "" && filter.list.length <= 0 ? (
+              <div>No results found</div>
+            ) : null}
           </ul>
         </PopoverContent>
       </PopoverPortal>
