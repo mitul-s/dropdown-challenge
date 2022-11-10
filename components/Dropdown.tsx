@@ -108,7 +108,10 @@ export const DropdownOption = ({
         alt={`Logo for ${title} cryptocurrency`}
       />
       <div className="flex flex-col items-start gap-y-1">
-        <div className="w-28 font-medium overflow-clip whitespace-nowrap text-ellipsis leading-[normal]">
+        <div
+          // Set width to truncate text + overflow clip, ellipsis
+          className="w-28 font-medium overflow-clip whitespace-nowrap text-ellipsis leading-[normal]"
+        >
           {title}
         </div>
         {subtitle ? (
@@ -149,10 +152,12 @@ export const DropdownInput = ({
 }: DropdownInputProps) => {
   return (
     <div className="relative transition-all rounded overflow-clip border gap-x-1.5 leading-none w-[346px] focus-within:ring-2 focus-within:ring-offset-2 hover:border-blue-200 focus-within:border-blue-200 group">
+      {/* Hidden label that only appears for screenreaders! Always include a label with an input :) */}
       <label className="sr-only" id="cmpd-label" htmlFor="assetSearch">
         Search for assets
       </label>
       <input
+        // subtle placeholder transition effects to make things more lively
         className="py-3.5 px-4 outline-none w-full transition-all placeholder:opacity-80 group-hover:placeholder:opacity-100 group-focus-within:placeholder:opacity-100"
         placeholder="Search for an asset"
         id="assetSearch"
@@ -246,6 +251,7 @@ export const Dropdown = ({ useSearch, options }: DropdownProps) => {
     }
     setSearchValue(event.target.value);
 
+    // Filte through data depending on the search query
     const results = options.filter((item) => {
       if (event.target.value === "") return options;
       return item.title
@@ -253,6 +259,7 @@ export const Dropdown = ({ useSearch, options }: DropdownProps) => {
         .includes(event.target.value.toLowerCase());
     });
     setFilter(results);
+    // Update the data with the filtered results
     dispatch({
       type: "updateOptions",
       payload: { options: results },
@@ -260,22 +267,24 @@ export const Dropdown = ({ useSearch, options }: DropdownProps) => {
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!open && event.key === "ArrowDown") {
+    if (!open && (event.key === "ArrowDown" || event.key === "ArrowUp")) {
       setOpen(true);
     }
 
     if (event.key === "Enter") {
       setOpen(false);
+      // No need to dispatch, item already set as selected by keyboard or mouseOver
       setSearchValue(filter[state.selectedIndex]?.title);
     }
 
+    // Avoid the input caret from moving when navigating with arrow keys
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {
       event.preventDefault();
     }
   };
 
   const handleClick = () => {
-    // select should happen on any opening interaction, not just click
+    // Open dropdown, but also select any text so user can overwrite it
     if (inputRef.current?.value !== "") {
       inputRef.current?.select();
     }
@@ -285,6 +294,7 @@ export const Dropdown = ({ useSearch, options }: DropdownProps) => {
   const handleSelect = (title: string) => {
     setOpen(false);
     setSearchValue(title);
+    // When selecting an item, return focus to the input
     if (inputRef.current) {
       inputRef.current.focus();
     }
@@ -297,6 +307,7 @@ export const Dropdown = ({ useSearch, options }: DropdownProps) => {
       if (!container) return;
 
       // Account for container padding "py-1.5"
+      // This also allows user to scroll up / down by hovering their mouse on the edge
       let edgePadding = 6.5;
 
       window.requestAnimationFrame(() => {
