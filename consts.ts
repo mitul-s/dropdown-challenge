@@ -1,13 +1,13 @@
-import bitcoin from "../public/images/bitcoin.png";
-import eth from "../public/images/ethereum.png";
-import ltc from "../public/images/litecoin.png";
-import omg from "../public/images/omg-network.png";
-import usdc from "../public/images/usd-coin.png";
-import bch from "../public/images/bitcoin-cash.png";
-import xlm from "../public/images/stellar-lumens.png";
-import xrp from "../public/images/ripple.png";
-import dai from "../public/images/dai.png";
-import doge from "../public/images/doge-coin.png";
+import bitcoin from "./public/images/bitcoin.png";
+import eth from "./public/images/ethereum.png";
+import ltc from "./public/images/litecoin.png";
+import omg from "./public/images/omg-network.png";
+import usdc from "./public/images/usd-coin.png";
+import bch from "./public/images/bitcoin-cash.png";
+import xlm from "./public/images/stellar-lumens.png";
+import xrp from "./public/images/ripple.png";
+import dai from "./public/images/dai.png";
+import doge from "./public/images/doge-coin.png";
 
 export const currencies = [
   {
