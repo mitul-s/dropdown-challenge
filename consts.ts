@@ -13,8 +13,17 @@ import chainlink from "./public/images/chainlink.png";
 import ox from "./public/images/ox.png";
 import peer from "./public/images/peercoin.png";
 import ethc from "./public/images/ethereum-classic.png";
+import { StaticImageData } from "next/image";
 
-export const currencies = [
+type Coin = {
+  id: number;
+  title: string;
+  subtitle: string;
+  descriptor: string | number;
+  image: string | StaticImageData;
+};
+
+export const currencies: Coin[] = [
   {
     id: 0,
     title: "Bitcoin",

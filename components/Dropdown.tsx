@@ -86,6 +86,8 @@ const DropdownOption = ({
   descriptor,
   onMouseMove,
   onClick,
+  id,
+  ...props
 }: DropdownOptionProps) => {
   return (
     <li
@@ -96,6 +98,7 @@ const DropdownOption = ({
       tabIndex={-1}
       onClick={onClick}
       onMouseMove={onMouseMove}
+      {...props}
     >
       <Image
         src={image}
