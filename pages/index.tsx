@@ -1,155 +1,137 @@
-import Head from "next/head";
 import Image, { StaticImageData } from "next/image";
 import * as React from "react";
 import {
   Popover,
-  PopoverTrigger,
   PopoverAnchor,
   PopoverContent,
   PopoverPortal,
 } from "@radix-ui/react-popover";
-import useSearch from "../hooks/useSearch";
-import bitcoin from "../public/images/bitcoin.png";
+import {
+  ScrollArea,
+  ScrollAreaViewport,
+  ScrollAreaScrollbar,
+  ScrollAreaThumb,
+} from "@radix-ui/react-scroll-area";
 import useKeyPress from "../hooks/useKeyPress";
 import { useReducer } from "react";
+import SearchIcon from "../components/SearchIcon";
+import { currencies as data } from "../lib/cryptocurrencies";
 
-type Dropdown = {
-  useSearch_: boolean;
+interface Dropdown {
+  useSearch: boolean;
   options: Array<Option>;
-};
+}
 
-type Option = {
+interface Option {
   id: number;
   title: string;
   image: string | StaticImageData;
   subtitle?: string;
   descriptor?: number;
   selected?: boolean;
-};
-
-const data = [
-  {
-    id: 0,
-    title: "Bitcoin",
-    subtitle: "BTC",
-    descriptor: 50000,
-    image: bitcoin,
-  },
-  {
-    id: 1,
-    title: "Ethereum",
-    subtitle: "ETH",
-    descriptor: 3000,
-    image: "",
-  },
-  {
-    id: 2,
-    title: "Dogecoin",
-    subtitle: "Doge",
-    descriptor: 3000,
-    image: "",
-  },
-  {
-    id: 3,
-    title: "Bitcoin Cash",
-    subtitle: "BCH",
-    descriptor: 3000,
-    image: "",
-  },
-  {
-    id: 4,
-    title: "Dai",
-    subtitle: "Dai",
-    descriptor: 3000,
-    image: "",
-  },
-  {
-    id: 5,
-    title: "Litecoin",
-    subtitle: "LTC",
-    descriptor: 3000,
-    image: "",
-  },
-];
-
-const SearchIcon = () => (
-  <svg width={20} height={20} fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path
-      fillRule="evenodd"
-      clipRule="evenodd"
-      d="M14 9.167a4.833 4.833 0 1 1-9.667 0 4.833 4.833 0 0 1 9.667 0Zm-.95 4.353a5.833 5.833 0 1 1 .687-.727l3.763 3.763-.707.707-3.743-3.743Z"
-      fill="#000"
-    />
-  </svg>
-);
-
-const AddIcon = (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width={20}
-    height={20}
-    viewBox="0 0 256 256"
-  >
-    <path fill="none" d="M0 0h256v256H0z" />
-    <circle
-      cx={128}
-      cy={128}
-      r={96}
-      fill="none"
-      stroke="#000"
-      strokeMiterlimit={10}
-      strokeWidth={16}
-    />
-    <path
-      fill="none"
-      stroke="#000"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={16}
-      d="M88 128h80M128 88v80"
-    />
-  </svg>
-);
+  onMouseMove?: () => void;
+  onClick?: () => void;
+}
 
 type State = {
   selectedIndex: number;
+  options: Array<Option>;
 };
 
-interface Action {
-  type: string;
-  payload?: number;
-}
-type Reducer<State, Action> = (state: State, action: Action) => State;
+type Action =
+  | { type: "arrowUp" | "arrowDown" }
+  | { type: "select"; payload: State }
+  | { type: "updateOptions"; payload: { options: Array<Option> } };
 
-const initialState: State = { selectedIndex: 0 };
+const initialState: State = { selectedIndex: 0, options: data };
 
-function reducer(state: State, action: Action): State {
+function reducer(state: State, action: Action) {
   switch (action.type) {
+    case "updateOptions":
+      return {
+        selectedIndex: 0,
+        options: action.payload.options,
+      };
     case "arrowUp":
       return {
+        options: state.options,
         selectedIndex:
-          state.selectedIndex !== 0 ? state.selectedIndex - 1 : data.length - 1,
+          state.selectedIndex !== 0
+            ? state.selectedIndex - 1
+            : state.options.length - 1,
       };
     case "arrowDown":
+      console.log(state.selectedIndex);
+      console.log("options", state.options.length - 1);
       return {
+        options: state.options,
         selectedIndex:
-          state.selectedIndex !== data.length - 1 ? state.selectedIndex + 1 : 0,
+          state.selectedIndex !== state.options.length - 1
+            ? state.selectedIndex + 1
+            : 0,
       };
     case "select":
-      return { selectedIndex: action.payload };
+      return {
+        selectedIndex: action.payload.selectedIndex,
+        options: action.payload.options,
+      };
     default:
       throw new Error();
   }
 }
 
-const Dropdown = ({ useSearch_, options }: Dropdown) => {
+const Option = ({
+  image,
+  selected,
+  title,
+  subtitle,
+  descriptor,
+  onMouseMove,
+  onClick,
+}: Option) => {
+  return (
+    <li
+      className="list-none transition rounded data-[selected=true]:bg-gray-light group flex items-center w-full h-full p-2 text-xs leading-none gap-x-3 cursor-pointer"
+      role="option"
+      aria-selected={selected}
+      data-selected={selected}
+      tabIndex={-1}
+      onClick={onClick}
+      onMouseMove={onMouseMove}
+    >
+      <Image
+        src={image}
+        className="w-5 h-5 rounded-full"
+        alt={`Logo for ${title} currency`}
+      />
+      <div className="flex flex-col items-start gap-y-1">
+        <div className="w-24 font-medium overflow-x-clip text-ellipsis whitespace-nowrap">
+          {title}
+        </div>
+        {subtitle && (
+          <span className="tracking-tight uppercase text-black/50">
+            ${subtitle}
+          </span>
+        )}
+      </div>
+      <div className="flex items-center ml-auto gap-x-2">
+        <div className="invisible px-1.5 py-0.5 leading-none transition rounded bg-gray text-gray-dark group-data-[selected=true]:visible">
+          Enter ↵
+        </div>
+        {descriptor &&
+          new Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency: "USD",
+          }).format(descriptor)}
+      </div>
+    </li>
+  );
+};
+
+const Dropdown = ({ useSearch, options }: Dropdown) => {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const containerRef = React.useRef<HTMLUListElement>(null);
-  // const { results, searchValue, setSearchValue } = useSearch<Option>({
-  //   dataSet: options,
-  //   keys: ["title", "subtitle"],
-  // });
-  const [searchValue, setSearchValue] = React.useState("");
+  const [searchValue, setSearchValue] = React.useState<string>("");
   const [filter, setFilter] = React.useState({
     query: "",
     list: options,
@@ -159,47 +141,67 @@ const Dropdown = ({ useSearch_, options }: Dropdown) => {
   const arrowDownPressed = useKeyPress("ArrowDown", inputRef);
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const [open, setOpen] = React.useState<boolean>(false);
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleOpen = () => {
     if (!open) {
+      if (inputRef.current?.value !== "") {
+        inputRef.current?.select();
+      }
       setOpen(true);
     }
+  };
+
+  const [open, setOpen] = React.useState<boolean>(false);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleOpen();
     setSearchValue(e.target.value);
 
-    const results = options.filter((post) => {
+    const results = options.filter((item) => {
       if (e.target.value === "") return options;
-      return post.title.toLowerCase().includes(e.target.value.toLowerCase());
+      return item.title.toLowerCase().includes(e.target.value.toLowerCase());
     });
     setFilter({
       query: e.target.value,
       list: results,
     });
+    dispatch({
+      type: "updateOptions",
+      payload: { options: results },
+    });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!open && e.key === "ArrowDown") {
-      setOpen(true);
+    if (!open && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
+      handleOpen();
     }
 
     if (e.key === "Enter") {
       setOpen(false);
-      // dispatch({ type: "select", payload: state.selectedIndex });
-      console.log(filter);
-      console.log(filter.list[state.selectedIndex]);
       setSearchValue(filter.list[state.selectedIndex]?.title);
     }
 
     if (e.key === "ArrowDown" || e.key === "ArrowUp") {
       e.preventDefault();
     }
-  };
+    // if (!e.isDefaultPrevented()) {
+    //   const container = containerRef.current;
+    //   if (!container) return;
 
-  const handleClick = () => {
-    // select should happen on any opening interaction, not just click
-    if (inputRef.current?.value !== "") {
-      inputRef.current?.select();
-    }
-    setOpen(true);
+    //   window.requestAnimationFrame(() => {
+    //     const element = container.querySelector(
+    //       "[aria-selected=true]"
+    //     ) as HTMLElement;
+    //     if (element) {
+    //       const top = element.offsetTop - container.scrollTop;
+    //       const bottom =
+    //         container.scrollTop +
+    //         container.clientHeight -
+    //         (element.offsetTop + element.clientHeight);
+
+    //       if (bottom < 0) container.scrollTop -= bottom;
+    //       if (top < 0) container.scrollTop += top;
+    //     }
+    //   });
+    // }
   };
 
   const handleSelect = (title: string) => {
@@ -220,60 +222,17 @@ const Dropdown = ({ useSearch_, options }: Dropdown) => {
     }
   }, [arrowDownPressed]);
 
-  const Option = ({
-    image,
-    selected,
-    title,
-    subtitle,
-    descriptor,
-    id,
-    ...props
-  }: Option) => {
-    return (
-      <li
-        className="list-none transition rounded data-[selected=true]:bg-gray-light group"
-        role="option"
-        aria-selected={selected}
-        data-selected={selected}
-      >
-        <button
-          className="flex items-center w-full h-full p-2 text-xs leading-none gap-x-3"
-          tabIndex={-1}
-          onClick={() => handleSelect(title)}
-          onMouseMove={() => dispatch({ type: "select", payload: id })}
-          {...props}
-        >
-          <>
-            {/* <Image src={image} className="w-5 h-5 rounded-full" alt="" /> */}
-            <div className="flex flex-col items-start gap-y-1">
-              <div className="font-medium">{title}</div>
-              {subtitle && (
-                <span className="tracking-tight uppercase text-black/50">
-                  ${subtitle}
-                </span>
-              )}
-            </div>
-            <div className="flex items-center ml-auto gap-x-2">
-              <div className="invisible px-1.5 py-0.5 leading-none transition rounded bg-gray text-gray-dark group-data-[selected=true]:visible">
-                Enter ↵
-              </div>
-              {descriptor &&
-                new Intl.NumberFormat("en-US", {
-                  style: "currency",
-                  currency: "USD",
-                }).format(descriptor)}
-            </div>
-          </>
-        </button>
-      </li>
-    );
-  };
-
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverAnchor>
-        {useSearch_ ? (
-          <div className="relative transition-all rounded overflow-clip border gap-x-1.5 leading-none w-[346px] focus-within:ring-2 focus-within:ring-offset-2 hover:border-blue-200 focus-within:border-blue-200 group">
+        {useSearch ? (
+          <div
+            className="relative transition-all rounded overflow-clip border gap-x-1.5 leading-none w-[346px] focus-within:ring-2 focus-within:ring-offset-2 hover:border-blue-200 focus-within:border-blue-200 group"
+            role="combobox"
+            aria-controls="cmpd-currencies"
+            aria-expanded={open}
+            aria-haspopup="listbox"
+          >
             <label className="sr-only" id="cmpd-label" htmlFor="assetSearch">
               Search for assets
             </label>
@@ -281,17 +240,17 @@ const Dropdown = ({ useSearch_, options }: Dropdown) => {
               className="py-3.5 px-4 outline-none w-full transition group-hover:opacity-80 group-focus-within:opacity-80 opacity-60"
               placeholder="Search for an asset"
               id="assetSearch"
-              role="combobox"
-              aria-controls="cmpd-currencies"
-              aria-expanded={open}
               aria-labelledby="cmpd-label"
+              aria-autocomplete="list"
               autoCorrect="off"
               autoComplete="off"
+              role="searchbox"
               spellCheck={false}
               type="text"
               value={searchValue}
               onChange={handleChange}
-              onClick={handleClick}
+              onClick={handleOpen}
+              // onFocus={handleOpen}
               onKeyDown={handleKeyDown}
               ref={inputRef}
             />
@@ -306,6 +265,7 @@ const Dropdown = ({ useSearch_, options }: Dropdown) => {
           <button
             className="w-full py-2 text-white transition border rounded shadow-sm bg-gray-darker hover:bg-gray-darker/90 active:shadow-none hover:shadow"
             onClick={() => setOpen(!open)}
+            // ref={inputRef}
           >
             Search
           </button>
@@ -314,40 +274,45 @@ const Dropdown = ({ useSearch_, options }: Dropdown) => {
       <PopoverPortal>
         <PopoverContent
           onOpenAutoFocus={(e) => e.preventDefault()}
-          className="w-[346px]"
+          className="w-[346px] px-2 bg-white border rounded shadow-xl popover overflow-hidden"
           id="cmpd-currencies"
           sideOffset={8}
+          asChild
         >
-          <ul
-            className="flex flex-col px-2 overflow-auto bg-white border rounded shadow-xl h-fit max-h-64 py-1.5"
-            role="listbox"
-            ref={containerRef}
-          >
-            {/* {options
-              .filter(
-                (option) => option.title.includes(filter) || filter === ""
-              )
-              .map((item) => (
-                <Option key={item.title} {...item} />
-              ))} */}
-            {/* {results.map((item) => (
-              <Option
-                key={item.id}
-                selected={state.selectedIndex === item.id}
-                {...item}
-              />
-            ))} */}
-            {filter.list.map((item) => (
-              <Option
-                key={item.title}
-                selected={state.selectedIndex === item.id}
-                {...item}
-              />
-            ))}
-            {searchValue !== "" && filter.list.length <= 2 ? (
-              <Option image={AddIcon} title={`Add "${searchValue}" manually`} />
-            ) : null}
-          </ul>
+          <ScrollArea>
+            <ScrollAreaViewport className="w-full h-full rounded-inherit">
+              <ul className="py-1.5" role="listbox" ref={containerRef}>
+                {filter.list.map((item, index) => {
+                  return (
+                    <Option
+                      key={item.title}
+                      selected={state.selectedIndex === index}
+                      onMouseMove={() =>
+                        dispatch({
+                          type: "select",
+                          payload: {
+                            selectedIndex: index,
+                            options: filter.list,
+                          },
+                        })
+                      }
+                      onClick={() => handleSelect(item.title)}
+                      {...item}
+                    />
+                  );
+                })}
+                {/* {searchValue !== "" && filter.list.length === 0 ? (
+                  <div>No results found!</div>
+                ) : null} */}
+              </ul>
+            </ScrollAreaViewport>
+            <ScrollAreaScrollbar
+              className="flex bg-white select-none touch-none p-1 data-[orientation=vertical]:w-2"
+              orientation="vertical"
+            >
+              <ScrollAreaThumb className="relative flex-1 w-4 transition rounded-md bg-gray-dark/50 hover:bg-gray-dark" />
+            </ScrollAreaScrollbar>
+          </ScrollArea>
         </PopoverContent>
       </PopoverPortal>
     </Popover>
@@ -355,11 +320,10 @@ const Dropdown = ({ useSearch_, options }: Dropdown) => {
 };
 
 export default function Home() {
-  // const [open, setOpen] = React.useState(true);
   return (
     <div className="grid w-screen h-screen gap-y-12 place-content-center">
-      <Dropdown useSearch_={true} options={data} />
-      {/* <Dropdown useSearch_={false} options={data} /> */}
+      <Dropdown useSearch={true} options={data} />
+      <Dropdown useSearch={false} options={data} />
     </div>
   );
 }
