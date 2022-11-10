@@ -9,21 +9,6 @@ import {
 import useKeyPress from "../hooks/useKeyPress";
 import { useReducer } from "react";
 import { Search } from "./Icons";
-interface DropdownProps {
-  useSearch: boolean;
-  options: Array<DropdownOptionProps>;
-}
-
-interface DropdownOptionProps {
-  id: number;
-  title: string;
-  image: string | StaticImageData;
-  subtitle?: string;
-  descriptor?: number;
-  selected?: boolean;
-  onMouseMove?: () => void;
-  onClick?: () => void;
-}
 
 interface State {
   selectedIndex: number;
@@ -68,6 +53,17 @@ function reducer(state: State, action: Action) {
   }
 }
 
+interface DropdownOptionProps {
+  id: number;
+  title: string;
+  image: string | StaticImageData;
+  subtitle?: string;
+  descriptor?: number;
+  selected?: boolean;
+  onMouseMove?: () => void;
+  onClick?: () => void;
+}
+
 const DropdownOption = ({
   image,
   selected,
@@ -95,18 +91,20 @@ const DropdownOption = ({
     >
       <Image src={image} className="w-5 h-5 rounded-full" alt="" />
       <div className="flex flex-col items-start gap-y-1">
-        <div className="font-medium">{title}</div>
-        {subtitle && (
+        <div className="w-24 font-medium overflow-clip whitespace-nowrap text-ellipsis leading-[normal]">
+          {title}
+        </div>
+        {subtitle ? (
           <span className="tracking-tight uppercase text-black/50">
             ${subtitle}
           </span>
-        )}
+        ) : null}
       </div>
       <div className="flex items-center ml-auto gap-x-2">
         <div className="invisible px-1.5 py-0.5 leading-none transition rounded bg-gray text-gray-dark group-data-[selected=true]:visible">
           Enter ↵
         </div>
-        {descriptor && formatCurrency(descriptor)}
+        {descriptor ? formatCurrency(descriptor) : null}
       </div>
     </li>
   );
@@ -162,6 +160,11 @@ const DropdownInput = ({
     </div>
   );
 };
+
+interface DropdownProps {
+  useSearch: boolean;
+  options: Array<DropdownOptionProps>;
+}
 
 const Dropdown = ({ useSearch, options }: DropdownProps) => {
   const initialState: State = { selectedIndex: 0, options: options };
@@ -265,6 +268,8 @@ const Dropdown = ({ useSearch, options }: DropdownProps) => {
       <PopoverPortal>
         <PopoverContent
           onOpenAutoFocus={(e) => e.preventDefault()}
+          // Exit animations are failing on Radix Components & Next.js 13
+          // So I only included enter animation for now
           className="w-[346px] data-[state=open]:animate-slide-down"
           id="cmpd-currencies"
           sideOffset={8}
