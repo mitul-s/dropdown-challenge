@@ -137,7 +137,7 @@ const DropdownInput = ({
         Search for assets
       </label>
       <input
-        className="py-3.5 px-4 outline-none w-full transition group-hover:opacity-80 group-focus-within:opacity-80 opacity-60"
+        className="py-3.5 px-4 outline-none w-full transition-all placeholder:opacity-80 group-hover:placeholder:opacity-100"
         placeholder="Search for an asset"
         id="assetSearch"
         name="assetSearch"
@@ -246,7 +246,7 @@ const Dropdown = ({ useSearch, options }: DropdownProps) => {
   };
 
   // Icky
-  React.useLayoutEffect(() => {
+  React.useEffect(() => {
     if (open) {
       const container = containerRef.current;
       if (!container) return;
