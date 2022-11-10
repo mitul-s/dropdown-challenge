@@ -1,8 +1,8 @@
-import React from "react"
+import React from "react";
 
 type Handler = {
-    key: string;
-}
+  key: string;
+};
 
 const useKeyPress = (targetKey: string, ref: React.RefObject<HTMLElement>) => {
   const [keyPressed, setKeyPressed] = React.useState(false);
