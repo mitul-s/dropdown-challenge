@@ -251,7 +251,7 @@ export const Dropdown = ({ useSearch, options }: DropdownProps) => {
     }
     setSearchValue(event.target.value);
 
-    // Filte through data depending on the search query
+    // Filter through data depending on the search query
     const results = options.filter((item) => {
       if (event.target.value === "") return options;
       return item.title
@@ -328,6 +328,8 @@ export const Dropdown = ({ useSearch, options }: DropdownProps) => {
         }
       });
     }
+    // state.selectedIndex as a dependency
+    // so it essentially runs whenever there's a keyboard navigation / mouseOver
   }, [open, state.selectedIndex]);
 
   React.useEffect(() => {
@@ -390,6 +392,7 @@ export const Dropdown = ({ useSearch, options }: DropdownProps) => {
             );
           })}
           {searchValue !== "" && filter.length <= 0 ? (
+            // Empty state
             <div className="py-2 mx-auto text-xs font-medium">
               No assets found
             </div>

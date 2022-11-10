@@ -4,7 +4,7 @@ type HandlerProps = {
   key: string;
 };
 
-// Abstracted from https://usehooks.com/useKeyPress/
+// Abstracted and modified from https://usehooks.com/useKeyPress/
 const useKeyPress = (targetKey: string, ref: React.RefObject<HTMLElement>) => {
   const [keyPressed, setKeyPressed] = React.useState(false);
 
