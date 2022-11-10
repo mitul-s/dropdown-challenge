@@ -13,120 +13,111 @@ import chainlink from "./public/images/chainlink.png";
 import ox from "./public/images/ox.png";
 import peer from "./public/images/peercoin.png";
 import ethc from "./public/images/ethereum-classic.png";
-import { StaticImageData } from "next/image";
 
-type Coin = {
-  id: number;
-  title: string;
-  subtitle: string;
-  descriptor: string | number;
-  image: string | StaticImageData;
-};
-
-export const currencies: Coin[] = [
+export const currencies = [
   {
     id: 0,
     title: "Bitcoin",
     subtitle: "BTC",
-    descriptor: 50000,
+    descriptor: 16578.4,
     image: bitcoin,
   },
   {
     id: 1,
     title: "Ethereum",
     subtitle: "ETH",
-    descriptor: 3000,
+    descriptor: 4403.02,
     image: eth,
   },
   {
     id: 2,
     title: "Dogecoin",
     subtitle: "Doge",
-    descriptor: 3000,
+    descriptor: 0.08,
     image: doge,
   },
   {
     id: 3,
     title: "Bitcoin Cash",
     subtitle: "BCH",
-    descriptor: 3000,
+    descriptor: 94.4,
     image: bch,
   },
   {
     id: 4,
     title: "Dai",
     subtitle: "Dai",
-    descriptor: 3000,
+    descriptor: 1.02,
     image: dai,
   },
   {
     id: 5,
     title: "Litecoin",
     subtitle: "LTC",
-    descriptor: 3000,
+    descriptor: 54.18,
     image: ltc,
   },
   {
     id: 6,
     title: "OMG Network",
     subtitle: "OMG",
-    descriptor: 3000,
+    descriptor: 0.03,
     image: omg,
   },
   {
     id: 7,
     title: "United States Dollar Coin",
     subtitle: "USDC",
-    descriptor: 3000,
+    descriptor: 1.02,
     image: usdc,
   },
   {
     id: 8,
     title: "Stellar Lumens",
     subtitle: "XLM",
-    descriptor: 3000,
+    descriptor: 7.03,
     image: xlm,
   },
   {
     id: 9,
     title: "Ripple",
     subtitle: "XRP",
-    descriptor: 3000,
+    descriptor: 230.3,
     image: xrp,
   },
   {
     id: 10,
     title: "0x",
     subtitle: "ZRX",
-    descriptor: 3000,
+    descriptor: 0.33,
     image: ox,
   },
   {
     id: 11,
     title: "Peercoin",
     subtitle: "PPC",
-    descriptor: 3000,
+    descriptor: 30.34,
     image: peer,
   },
   {
     id: 12,
     title: "Cosmos",
     subtitle: "ATOM",
-    descriptor: 3000,
+    descriptor: 350.3,
     image: cosmos,
   },
   {
     id: 13,
     title: "Ethereum Classic",
     subtitle: "ETC",
-    descriptor: 3000,
+    descriptor: 643.0,
     image: ethc,
   },
   {
     id: 14,
     title: "Chainlink",
     subtitle: "LINK",
-    descriptor: 3000,
+    descriptor: 3.4,
     image: chainlink,
   },
 ];
